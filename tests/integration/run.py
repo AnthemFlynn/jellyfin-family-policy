@@ -65,7 +65,8 @@ try:
   expect('child cannot forge heartbeat',api('/FamilyPolicy/Heartbeat',{'UserIds':[user['Id']]},login['AccessToken'])[0],403)
  expect('anonymous parent endpoint',api('/FamilyPolicy/State')[0],401)
  expect('enrollment requires guard',api('/FamilyPolicy/Accounts/'+children[0][0],{'ExpectedRevision':0,'Policy':{'Rules':[]}},admin,'PUT')[0],503)
- env=os.environ.copy();env.update(FAMILY_POLICY_SERVER=BASE,FAMILY_POLICY_TOKEN=admin,FAMILY_POLICY_USERS=','.join(x[0] for x in children))
+ credential=state/'guard-credential';credential.write_text(admin+'\n');credential.chmod(0o600)
+ env=os.environ.copy();env.pop('FAMILY_POLICY_TOKEN',None);env.update(FAMILY_POLICY_SERVER=BASE,FAMILY_POLICY_TOKEN_FILE=str(credential),FAMILY_POLICY_USERS=','.join(x[0] for x in children))
  guard=subprocess.Popen([DOTNET,str(ROOT/'src/FamilyPolicy.Guard/bin/Release/net10.0/FamilyPolicy.Guard.dll')],env=env,stdout=(state/'guard.log').open('wb'),stderr=subprocess.STDOUT)
  time.sleep(2)
  fixtures=state/'media';fixtures.mkdir();seed=state/'seed.mp4'
