@@ -5,7 +5,10 @@ using System.Text.Json.Nodes;
 var uri = new Uri(Environment.GetEnvironmentVariable("FAMILY_POLICY_SERVER") ?? throw new ArgumentException("FAMILY_POLICY_SERVER required."));
 if (uri.Scheme is not ("http" or "https") || !string.IsNullOrEmpty(uri.UserInfo) || !string.IsNullOrEmpty(uri.Query)) throw new ArgumentException("Invalid server URL.");
 if (uri.Scheme == "http" && !uri.IsLoopback && Environment.GetEnvironmentVariable("FAMILY_POLICY_ALLOW_HTTP") != "true") throw new ArgumentException("HTTPS required outside loopback unless explicitly enabling trusted-network HTTP.");
-var token = Environment.GetEnvironmentVariable("FAMILY_POLICY_TOKEN") ?? throw new ArgumentException("FAMILY_POLICY_TOKEN required.");
+var tokenFile = Environment.GetEnvironmentVariable("FAMILY_POLICY_TOKEN_FILE");
+var token = tokenFile is null
+    ? Environment.GetEnvironmentVariable("FAMILY_POLICY_TOKEN") ?? throw new ArgumentException("FAMILY_POLICY_TOKEN_FILE or FAMILY_POLICY_TOKEN required.")
+    : File.ReadAllText(tokenFile).TrimEnd('\r', '\n');
 if (token.Contains('"') || token.Any(char.IsControl)) throw new ArgumentException("Invalid credential format.");
 var targets = (Environment.GetEnvironmentVariable("FAMILY_POLICY_USERS") ?? "").Split(',', StringSplitOptions.RemoveEmptyEntries).Select(Guid.Parse).Distinct().ToArray();
 if (targets.Length == 0 || targets.Any(id => id == Guid.Empty)) throw new ArgumentException("Explicit nonempty managed user IDs required.");

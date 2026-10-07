@@ -10,9 +10,13 @@ supported-version and real-client checks in docs/testing.md pass for your setup.
 3. Restart Jellyfin. Confirm the Family Policy page appears in administrator plugin
    settings. Never install PolicySpike.dll or the retained upstream reference DLL.
 4. Build/run the independent src/FamilyPolicy.Guard project with these variables:
-   FAMILY_POLICY_SERVER (base URL), FAMILY_POLICY_TOKEN (administrator token from
-   secure storage), FAMILY_POLICY_USERS (explicit comma-separated managed UUIDs).
+   FAMILY_POLICY_SERVER (base URL), FAMILY_POLICY_TOKEN_FILE (read-only credential
+   file or mounted secret), FAMILY_POLICY_USERS (explicit comma-separated managed
+   UUIDs). FAMILY_POLICY_TOKEN is an environment-only fallback. Prefer a dedicated
+   revocable Jellyfin administrator API key rather than a shared personal login.
    Do not put credentials in command arguments, compose examples or source control.
+The guard needs administrator privileges because the native user-policy API
+   requires elevation; Jellyfin does not provide a narrower guard-specific API scope.
 5. Use HTTPS outside loopback. Trusted-network HTTP requires explicit
    FAMILY_POLICY_ALLOW_HTTP=true; traffic must stay on a restricted management path.
 6. Supervise the guard independently with automatic restart. A rootless pinned
