@@ -111,6 +111,7 @@ try:
  if os.environ.get('FAMILY_POLICY_BROWSER_TESTS')=='1':
   from browser import check_ui
   report.append(check_ui(BASE,admin,parent_id,ROOT))
+ expect('stale revision rejected',api('/FamilyPolicy/Accounts/'+children[0][0],{'ExpectedRevision':0,'Policy':policy},admin,'PUT')[0],409)
  # Per-child title override, independent of industry rating.
  uid,token=children[0];_,s=api('/FamilyPolicy/State',token=admin)
  exception={**policy,'Rules':policy['Rules']+[{'Id':'specific-exception','Priority':100,'Effect':'Allow','When':{'Field':'Title','Values':[titles['Mature']['Id']]}}]}

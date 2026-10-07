@@ -20,7 +20,12 @@ public sealed class ParentController(PolicyStore store, PolicyService service, I
     private string Actor => User.FindFirst("Jellyfin-IsApiKey")?.Value == "True" ? "api-key" : User.FindFirst("Jellyfin-UserId")?.Value ?? "unknown";
     [HttpPost("Heartbeat")] public IActionResult Heartbeat(HeartbeatRequest request) { if (request.UserIds is null || request.UserIds.Length is < 1 or > 100 || request.UserIds.Contains(Guid.Empty)) return BadRequest(); lease.Renew(request.UserIds); return Ok(new { healthy = true }); }
     [HttpGet("Health")] public IActionResult Health() => Ok(new { loaded = true, guardHealthy = lease.Healthy, version = "0.1.0-preview" });
-    [HttpGet("State")] public IActionResult State() => Ok(new { store.Read().Revision, Accounts = store.Read().Accounts.Select(a => new { a.UserId, a.Policy }), store.Read().Audit, store.Read().Labels });
+    [HttpGet("State")]
+    public IActionResult State()
+    {
+        var snapshot = store.Read();
+        return Ok(new { snapshot.Revision, Accounts = snapshot.Accounts.Select(a => new { a.UserId, a.Policy }), snapshot.Audit, snapshot.Labels });
+    }
     [HttpPut("Labels/{itemId:guid}")]
     public IActionResult Labels(Guid itemId, LabelsRequest request)
     {
