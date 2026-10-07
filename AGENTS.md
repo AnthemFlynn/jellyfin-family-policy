@@ -5,9 +5,8 @@ an experimental Jellyfin 12.1 extension. Household state and credentials are
 never source/test fixtures. C#/.NET is required by the existing plugin interface;
 use the exact global.json SDK, locked restore and repository test gates.
 
-Layout: src/ and tests/ contain maintained code; the original
-Jellyfin.Plugin.PrivateLibraries/ project remains upstream reference only and
-must never be included in Family Policy artifacts. feasibility/ is a test-only
+Layout: src/ and tests/ contain maintained code; upstream implementation is retained in Git history, and its DLL must never be
+included in Family Policy artifacts. feasibility/ is a test-only
 extension spike, not production authorization. Retain upstream MIT attribution.
 
 Administrator authorization belongs on every mutation and unrestricted-search

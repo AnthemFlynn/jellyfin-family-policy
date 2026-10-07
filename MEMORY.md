@@ -9,7 +9,7 @@ updated: 2026-10-07
 Implemented: deterministic content/time core, administrator-only adapter, parent
 annotations, native content tags, ongoing-stream authorization, independent guard,
 revisioned persistence/restoration and PG/advanced editor. Source under src/;
-original upstream project is reference only, never the release DLL.
+upstream source is retained in Git history, never the release DLL.
 
 Standing decisions: explicit priorities and deny-on-tie; unknown exceptions do not
 grant and unknown denies block; independent content/time gates; no child self-grants;
