@@ -1,0 +1,134 @@
+<!doctype html>
+<html lang="en"><head><title>Family Policy</title></head><body>
+<div id="familyPolicyPage" data-role="page" class="page type-interior pluginConfigurationPage" data-require="emby-input,emby-button">
+<div data-role="content"><div class="content-primary">
+<h1>Family Policy <small>Experimental preview</small></h1>
+<p>Choose boundaries, then make exceptions. An independent health guard must supervise each managed account. Device buffering can outlast a server cutoff.</p>
+<label for="fpAccount">Account</label><select id="fpAccount"></select>
+<button is="emby-button" id="fpPg">Start with PG or lower</button>
+<label for="fpZone">Policy timezone</label><input id="fpZone" value="UTC" placeholder="America/Los_Angeles">
+<label for="fpAge">Configured age in years (optional; no birthday stored)</label><input id="fpAge" type="number" min="0" max="125">
+<fieldset><legend>Add a rule</legend>
+<label for="fpKind">Rule</label><select id="fpKind">
+<option value="unrated-subject">Allow unrated media about a subject</option><option value="franchise">Allow a franchise</option>
+<option value="category">Allow a category</option><option value="media-kind">Allow a media kind</option><option value="age">Age band with a rating ceiling</option>
+<option value="title-allow">Allow the selected title</option><option value="title-deny">Block the selected title</option>
+<option value="hours">Set normal viewing hours</option><option value="morning">Allow a category before a morning cutoff</option>
+</select>
+<label for="fpValue">Subject, franchise, category, media kind, or age threshold</label><input id="fpValue" placeholder="Soccer, Star Wars, Workout, Movie, or 12">
+<label for="fpAgeCeiling">Age-band maximum rating</label><select id="fpAgeCeiling"><option value="10">PG / TV-PG</option><option value="13">PG-13</option><option value="14">TV-14</option><option value="17">R / TV-MA</option></select>
+<label for="fpStart">From</label><input id="fpStart" type="time" value="08:00">
+<label for="fpEnd">Until</label><input id="fpEnd" type="time" value="18:00">
+<p>Morning exceptions run from midnight until “From”. Content permission and time permission are independent.</p>
+<button is="emby-button" id="fpAdd">Add rule</button>
+<div id="fpRules"></div></fieldset>
+<fieldset><legend>Review a title</legend>
+<label for="fpSearch">Search your library</label><input id="fpSearch"><button is="emby-button" id="fpFind">Search</button>
+<label for="fpMedia">Title</label><select id="fpMedia"></select>
+<label for="fpCategory">Parent-confirmed categories (comma separated)</label><input id="fpCategory" placeholder="Workout">
+<label for="fpSubject">Parent-confirmed subjects</label><input id="fpSubject" placeholder="Soccer">
+<label for="fpFranchise">Parent-confirmed franchises</label><input id="fpFranchise" placeholder="Star Wars">
+<button is="emby-button" id="fpLabels">Save confirmed labels</button>
+<button is="emby-button" id="fpPreview">Explain this title’s access</button>
+<pre id="fpExplanation" style="white-space:pre-wrap"></pre>
+<p>Only labels confirmed here affect exceptions. Downloaded metadata tags and AI suggestions cannot grant access.</p>
+</fieldset>
+<details><summary>Advanced policy JSON</summary><label for="fpPolicy">Policy</label><textarea id="fpPolicy" rows="20" style="width:100%;font-family:monospace"></textarea></details>
+<button is="emby-button" id="fpSave">Apply policy</button><button is="emby-button" id="fpRestore">Restore original account policy</button>
+<p id="fpResult" role="status" aria-live="polite"></p>
+<script>
+(function () {
+    let revision = 0, accounts = [], labels = {}, ruleCounter = 0;
+    const el = id => document.getElementById(id);
+    const preset = () => ({ SchemaVersion: 1, TimeZone: 'UTC', DefaultContentAllowed: false, DefaultTimeAllowed: true,
+        Rules: [{ Id: 'pg-default', Dimension: 'Content', Effect: 'Allow', Priority: 0, When: { Field: 'RatingAtMost', Number: 10 } }] });
+    function call(path, method = 'GET', data) {
+        return ApiClient.ajax({ url: ApiClient.getUrl('FamilyPolicy/' + path), type: method, dataType: 'json',
+            contentType: 'application/json', data: data === undefined ? undefined : JSON.stringify(data) });
+    }
+    function current() { const policy = JSON.parse(el('fpPolicy').value); policy.TimeZone = el('fpZone').value.trim(); policy.AgeYears = el('fpAge').value === '' ? null : Number(el('fpAge').value); return policy; }
+    function write(policy) { el('fpPolicy').value = JSON.stringify(policy, null, 2); render(policy); }
+    function render(policy) {
+        el('fpRules').replaceChildren();
+        policy.Rules.forEach((rule, index) => {
+            const row = document.createElement('p'), description = document.createElement('span'), remove = document.createElement('button');
+            description.textContent = rule.Id + ': ' + rule.Effect + ' ' + rule.Dimension + ' (priority ' + rule.Priority + ') ';
+            remove.type = 'button'; remove.textContent = 'Remove';
+            remove.addEventListener('click', () => { const p = current(); p.Rules.splice(index, 1); write(p); });
+            row.append(description, remove); el('fpRules').append(row);
+        });
+    }
+    function show() {
+        const account = accounts.find(a => a.UserId.replaceAll('-', '') === el('fpAccount').value.replaceAll('-', ''));
+        const policy = account ? account.Policy : preset(); el('fpZone').value = policy.TimeZone; el('fpAge').value = policy.AgeYears ?? ''; write(policy);
+    }
+    async function load() { const state = await call('State'); revision = state.Revision; accounts = state.Accounts; labels = state.Labels || {}; show(); }
+    function note(message) { el('fpResult').textContent = message; }
+    el('familyPolicyPage').addEventListener('pageshow', async () => {
+        try {
+            const users = await ApiClient.getUsers(); el('fpAccount').replaceChildren();
+            users.filter(u => !u.Policy.IsAdministrator).forEach(u => { const o = document.createElement('option'); o.value = u.Id; o.textContent = u.Name; el('fpAccount').append(o); });
+            await load();
+        } catch { note('Unable to load. Administrator access is required.'); }
+    });
+    el('fpAccount').addEventListener('change', show);
+    el('fpPg').addEventListener('click', () => { const p = preset(); el('fpZone').value = p.TimeZone; write(p); });
+    el('fpPolicy').addEventListener('change', () => { try { render(current()); } catch { note('Invalid policy JSON.'); } });
+    el('fpAdd').addEventListener('click', () => {
+        try {
+            const p = current(), kind = el('fpKind').value, value = el('fpValue').value.trim();
+            const rule = { Id: kind + '-' + Date.now().toString(36) + '-' + (++ruleCounter), Dimension: 'Content', Effect: 'Allow', Priority: 10 };
+            const leaf = (field, values) => ({ Field: field, Values: values });
+            const window = (start, end) => ({ Field: 'Window', Window: { Start: start + ':00', End: end + ':00' } });
+            if (kind === 'unrated-subject') rule.When = { All: [{ Field: 'Unrated' }, leaf('Subject', [value])] };
+            else if (kind === 'franchise') rule.When = leaf('Franchise', [value]);
+            else if (kind === 'category') rule.When = leaf('Category', [value]);
+            else if (kind === 'media-kind') rule.When = leaf('MediaKind', [value]);
+            else if (kind === 'age') { if (!/^\d+$/.test(value)) throw new Error(); rule.When = { All: [{ Field: 'AgeAtLeast', Number: Number(value) }, { Field: 'RatingAtMost', Number: Number(el('fpAgeCeiling').value) }] }; }
+            else if (kind.startsWith('title-')) {
+                if (!el('fpMedia').value) throw new Error(); rule.When = leaf('Title', [el('fpMedia').value]); rule.Priority = 100;
+                rule.Effect = kind === 'title-deny' ? 'Deny' : 'Allow';
+            } else if (kind === 'hours') {
+                rule.Dimension = 'Time'; rule.Priority = 0; rule.When = window(el('fpStart').value, el('fpEnd').value); p.DefaultTimeAllowed = false;
+            } else if (kind === 'morning') {
+                rule.Dimension = 'Time'; rule.When = { All: [leaf('Category', [value]), window('00:00', el('fpStart').value)] };
+            }
+            p.Rules.push(rule); write(p); note('Rule added to draft. Apply when ready.');
+        } catch { note('Choose a title or provide the required value and valid time boundaries.'); }
+    });
+    el('fpFind').addEventListener('click', async () => {
+        try {
+            const result = await ApiClient.getItems(ApiClient.getCurrentUserId(), { Recursive: true, IncludeItemTypes: 'Movie,Series,Episode,Video,Audio', SearchTerm: el('fpSearch').value, Limit: 50 });
+            el('fpMedia').replaceChildren(); result.Items.forEach(item => { const o = document.createElement('option'); o.value = item.Id; o.textContent = item.Name; el('fpMedia').append(o); });
+            showLabels();
+        } catch { note('Library search failed.'); }
+    });
+    function showLabels() {
+        const id = el('fpMedia').value.replaceAll('-', '');
+        const entry = Object.entries(labels).find(([key]) => key.replaceAll('-', '') === id)?.[1] || {};
+        el('fpCategory').value = (entry.Categories || []).join(', '); el('fpSubject').value = (entry.Subjects || []).join(', '); el('fpFranchise').value = (entry.Franchises || []).join(', ');
+    }
+    el('fpMedia').addEventListener('change', showLabels);
+    el('fpLabels').addEventListener('click', async () => {
+        try {
+            const split = id => el(id).value.split(',').map(s => s.trim()).filter(Boolean);
+            const id = el('fpMedia').value; if (!id) throw new Error();
+            await call('Labels/' + id, 'PUT', { ExpectedRevision: revision, Labels: { Categories: split('fpCategory'), Subjects: split('fpSubject'), Franchises: split('fpFranchise') } });
+            const state = await call('State'); revision = state.Revision; labels = state.Labels || {}; note('Parent-confirmed labels saved. Draft rules preserved.');
+        } catch { note('Labels not saved. Reload if another administrator changed configuration.'); }
+    });
+    el('fpPreview').addEventListener('click', async () => {
+        try { const d = await call('Preview/' + el('fpMedia').value, 'POST', current());
+            el('fpExplanation').textContent = 'Content: ' + (d.ContentAllowed ? 'allowed' : 'blocked') + ' — ' + d.ContentReasons.join(', ') + '\nTime: ' + (d.TimeAllowed ? 'allowed' : 'blocked') + ' — ' + d.TimeReasons.join(', ') + '\n' + JSON.stringify(d.Rules, null, 2);
+        } catch { note('Preview failed. Select a title and check the draft.'); }
+    });
+    el('fpSave').addEventListener('click', async () => {
+        try { await call('Accounts/' + el('fpAccount').value, 'PUT', { ExpectedRevision: revision, Policy: current() }); await load(); note('Policy applied.'); }
+        catch { note('Request did not complete. Reload to inspect saved state before retrying; check policy syntax and guard coverage.'); }
+    });
+    el('fpRestore').addEventListener('click', async () => {
+        try { await call('Accounts/' + el('fpAccount').value + '/Restore', 'POST', { ExpectedRevision: revision }); await load(); note('Original account policy restored.'); }
+        catch { note('Restore failed. Check server logs and reload.'); }
+    });
+})();
+</script></div></div></div></body></html>

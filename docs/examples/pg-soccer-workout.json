@@ -1,0 +1,13 @@
+{
+  "SchemaVersion": 1,
+  "TimeZone": "UTC",
+  "DefaultContentAllowed": false,
+  "DefaultTimeAllowed": false,
+  "Rules": [
+    {"Id":"pg-default","Dimension":"Content","Effect":"Allow","Priority":0,"When":{"Field":"RatingAtMost","Number":10}},
+    {"Id":"unrated-soccer","Dimension":"Content","Effect":"Allow","Priority":10,"When":{"All":[{"Field":"Unrated"},{"Field":"Subject","Values":["Soccer"]}]}},
+    {"Id":"star-wars","Dimension":"Content","Effect":"Allow","Priority":10,"When":{"Field":"Franchise","Values":["Star Wars"]}},
+    {"Id":"normal-hours","Dimension":"Time","Effect":"Allow","Priority":0,"When":{"Field":"Window","Window":{"Start":"08:00:00","End":"18:00:00"}}},
+    {"Id":"morning-workout","Dimension":"Time","Effect":"Allow","Priority":10,"When":{"All":[{"Field":"Category","Values":["Workout"]},{"Field":"Window","Window":{"Start":"00:00:00","End":"08:00:00"}}]}}
+  ]
+}

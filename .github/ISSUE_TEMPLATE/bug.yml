@@ -1,0 +1,22 @@
+name: Bug report
+description: Report a reproducible behavior problem without private household data.
+body:
+  - type: textarea
+    id: expected
+    attributes: {label: Expected behavior}
+    validations: {required: true}
+  - type: textarea
+    id: actual
+    attributes: {label: Actual behavior and minimal synthetic reproduction}
+    validations: {required: true}
+  - type: input
+    id: versions
+    attributes: {label: Jellyfin, plugin and client versions}
+    validations: {required: true}
+  - type: checkboxes
+    id: privacy
+    attributes:
+      label: Privacy
+      options:
+        - label: I removed passwords, tokens, household names and private configuration.
+          required: true

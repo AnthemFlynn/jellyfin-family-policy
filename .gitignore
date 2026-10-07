@@ -3,3 +3,11 @@ obj/
 *.user
 .vs/
 .idea/
+
+.test-server/
+.test-ffmpeg/
+TestResults/
+__pycache__/
+*.pyc
+integration-results.json
+dist/

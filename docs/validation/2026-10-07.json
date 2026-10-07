@@ -1,0 +1,264 @@
+{
+  "passed": true,
+  "checks": [
+    {
+      "check": "create synthetic parent",
+      "http": 204
+    },
+    {
+      "check": "finish setup",
+      "http": 204
+    },
+    {
+      "check": "parent login",
+      "http": 200
+    },
+    {
+      "check": "create ChildA",
+      "http": 200
+    },
+    {
+      "check": "baseline policy ChildA",
+      "http": 204
+    },
+    {
+      "check": "login ChildA",
+      "http": 200
+    },
+    {
+      "check": "child cannot read parent state",
+      "http": 403
+    },
+    {
+      "check": "child cannot forge heartbeat",
+      "http": 403
+    },
+    {
+      "check": "create ChildB",
+      "http": 200
+    },
+    {
+      "check": "baseline policy ChildB",
+      "http": 204
+    },
+    {
+      "check": "login ChildB",
+      "http": 200
+    },
+    {
+      "check": "child cannot read parent state",
+      "http": 403
+    },
+    {
+      "check": "child cannot forge heartbeat",
+      "http": 403
+    },
+    {
+      "check": "anonymous parent endpoint",
+      "http": 401
+    },
+    {
+      "check": "enrollment requires guard",
+      "http": 503
+    },
+    {
+      "check": "create fixture library",
+      "http": 204
+    },
+    {
+      "check": "imported subject tags cannot grant access",
+      "blocked_before_parent_confirmation": true
+    },
+    {
+      "check": "parent-owned labels",
+      "http": 200
+    },
+    {
+      "check": "child cannot change labels",
+      "http": 403
+    },
+    {
+      "check": "parent-owned labels",
+      "http": 200
+    },
+    {
+      "check": "child cannot change labels",
+      "http": 403
+    },
+    {
+      "check": "parent-owned labels",
+      "http": 200
+    },
+    {
+      "check": "child cannot change labels",
+      "http": 403
+    },
+    {
+      "check": "parent enrolls child",
+      "http": 200
+    },
+    {
+      "check": "child cannot change own policy",
+      "http": 403
+    },
+    {
+      "check": "child cannot restore restrictions",
+      "http": 403
+    },
+    {
+      "check": "direct item Safe",
+      "http": 200
+    },
+    {
+      "check": "direct item Soccer",
+      "http": 200
+    },
+    {
+      "check": "direct item Mature",
+      "http": 403
+    },
+    {
+      "check": "direct item Franchise",
+      "http": 403
+    },
+    {
+      "check": "catalog exact allowlist",
+      "titles": [
+        "Safe",
+        "Soccer",
+        "Workout"
+      ]
+    },
+    {
+      "check": "parent enrolls child",
+      "http": 200
+    },
+    {
+      "check": "child cannot change own policy",
+      "http": 403
+    },
+    {
+      "check": "child cannot restore restrictions",
+      "http": 403
+    },
+    {
+      "check": "direct item Safe",
+      "http": 200
+    },
+    {
+      "check": "direct item Soccer",
+      "http": 200
+    },
+    {
+      "check": "direct item Mature",
+      "http": 403
+    },
+    {
+      "check": "direct item Franchise",
+      "http": 403
+    },
+    {
+      "check": "catalog exact allowlist",
+      "titles": [
+        "Safe",
+        "Soccer",
+        "Workout"
+      ]
+    },
+    {
+      "check": "Chromium rule-editor workflow",
+      "preset_and_advanced_rules": true,
+      "preview_uses_native_api": true,
+      "label_save_preserves_draft": true
+    },
+    {
+      "check": "parent grants individual R exception",
+      "http": 200
+    },
+    {
+      "check": "approved child direct item",
+      "http": 200
+    },
+    {
+      "check": "other child remains blocked",
+      "http": 403
+    },
+    {
+      "check": "native media file delivery",
+      "http": 200
+    },
+    {
+      "check": "native media file delivery",
+      "http": 403
+    },
+    {
+      "check": "create generated TV fixtures",
+      "http": 204
+    },
+    {
+      "check": "apply series and episode decisions",
+      "http": 200
+    },
+    {
+      "check": "approved series visible",
+      "http": 200
+    },
+    {
+      "check": "episode inherits series grant",
+      "http": 200
+    },
+    {
+      "check": "episode denial wins",
+      "http": 403
+    },
+    {
+      "check": "other child series denied",
+      "http": 403
+    },
+    {
+      "check": "native HLS manifest and segment delivery",
+      "approved_child": true
+    },
+    {
+      "check": "other child HLS denied",
+      "http": 403
+    },
+    {
+      "check": "configure timed native test",
+      "http": 200
+    },
+    {
+      "check": "native PhysicalFile schedule cutoff",
+      "curl_exit": 56,
+      "http_and_bytes": "200 6586160",
+      "elapsed_seconds": 6.3
+    },
+    {
+      "check": "native restart denied after deadline",
+      "http": 403
+    },
+    {
+      "check": "cross-user query spoof",
+      "http": 403
+    },
+    {
+      "check": "legacy segment route denied",
+      "http": 403
+    },
+    {
+      "check": "original policy restore",
+      "http": 200
+    },
+    {
+      "check": "reenroll for failure test",
+      "http": 200
+    },
+    {
+      "check": "plugin-absence guard",
+      "all_managed_accounts_disabled": true
+    }
+  ],
+  "server": "Jellyfin 12.1.0 unmodified",
+  "platform": "macOS arm64",
+  "core_tests": 28
+}

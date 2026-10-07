@@ -1,0 +1,16 @@
+version: 2
+updates:
+  - package-ecosystem: github-actions
+    directory: /
+    schedule: {interval: monthly}
+  - package-ecosystem: nuget
+    directories:
+      - /src/FamilyPolicy.Plugin
+      - /tests/FamilyPolicy.Core.Tests
+    schedule: {interval: monthly}
+  - package-ecosystem: pip
+    directory: /tests/integration
+    schedule: {interval: monthly}
+  - package-ecosystem: docker
+    directory: /src/FamilyPolicy.Guard
+    schedule: {interval: monthly}
