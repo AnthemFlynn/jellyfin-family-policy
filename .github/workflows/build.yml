@@ -11,6 +11,7 @@ concurrency:
   cancel-in-progress: true
 jobs:
   unit:
+    timeout-minutes: 10
     strategy:
       fail-fast: false
       matrix:
@@ -36,6 +37,7 @@ jobs:
           path: tests/**/TestResults/*.trx
   integration:
     name: Native acceptance Jellyfin ${{ matrix.server.version }}
+    timeout-minutes: 15
     strategy:
       fail-fast: false
       matrix:
@@ -69,9 +71,10 @@ jobs:
             *) exit 1 ;;
           esac
       - name: Prepare pinned runtime tools
+        timeout-minutes: 5
         run: |
           mkdir -p .test-ffmpeg
-          curl --fail --location --silent --show-error https://github.com/jellyfin/jellyfin-ffmpeg/releases/download/v8.1.3-1/jellyfin-ffmpeg_8.1.3-1_portable_linux64-gpl.tar.xz -o .test-ffmpeg/archive.tar.xz
+          curl --fail --location --silent --show-error --connect-timeout 10 --max-time 120 --retry 2 https://github.com/jellyfin/jellyfin-ffmpeg/releases/download/v8.1.3-1/jellyfin-ffmpeg_8.1.3-1_portable_linux64-gpl.tar.xz -o .test-ffmpeg/archive.tar.xz
           echo 'b86dc023c64a5a9a410e6e3a938a970460214fae78f31c1553c9f88f1c289b6a  .test-ffmpeg/archive.tar.xz' | sha256sum --check
           tar -xf .test-ffmpeg/archive.tar.xz -C .test-ffmpeg
           pip install -r tests/integration/requirements.txt
@@ -97,6 +100,7 @@ jobs:
           path: integration-results.json
 
   guard-container:
+    timeout-minutes: 10
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
