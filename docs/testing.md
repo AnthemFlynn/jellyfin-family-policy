@@ -37,6 +37,9 @@ Port 18097 must be free. The harness uses fresh private temporary directories,
 no household media/credentials. Failed diagnostics are retained locally for
 inspection; successful directories are removed. Never upload raw diagnostics.
 
+Transcoder cleanup follows Jellyfin's native idle cleanup. The worker does not
+terminate all jobs by a caller-controlled device ID.
+
 ## Remaining production release gates
 
 - Actual installed web-shell and Apple TV/iPhone child sessions, including buffered

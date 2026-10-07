@@ -110,4 +110,4 @@ jobs:
           result=$?
           set -e
           test "$result" -eq 124
-          rg 'Family Policy guard started' guard-smoke.log
+          python3 -c "from pathlib import Path; assert 'Family Policy guard started' in Path('guard-smoke.log').read_text()"
