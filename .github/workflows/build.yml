@@ -34,6 +34,7 @@ jobs:
           name: tests-${{ matrix.os }}
           path: tests/**/TestResults/*.trx
   integration:
+    name: Native acceptance Jellyfin ${{ matrix.server.version }}
     strategy:
       fail-fast: false
       matrix:
@@ -81,3 +82,17 @@ jobs:
         with:
           name: native-integration-results-${{ matrix.server.version }}
           path: integration-results.json
+
+  guard-container:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+      - run: docker build -f src/FamilyPolicy.Guard/Dockerfile -t family-policy-guard:test .
+      - name: Non-root container runtime smoke
+        run: |
+          set +e
+          timeout 5 docker run --rm -e FAMILY_POLICY_SERVER=http://127.0.0.1:1 -e FAMILY_POLICY_TOKEN=synthetic-test-value -e FAMILY_POLICY_USERS=11111111-1111-1111-1111-111111111111 family-policy-guard:test > guard-smoke.log 2>&1
+          result=$?
+          set -e
+          test "$result" -eq 124
+          rg 'Family Policy guard started' guard-smoke.log

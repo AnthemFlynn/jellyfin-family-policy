@@ -1,0 +1,11 @@
+<Project>
+  <PropertyGroup>
+    <Authors>Anthem Flynn</Authors>
+    <Company>Anthem Flynn</Company>
+    <RepositoryUrl>https://github.com/AnthemFlynn/jellyfin-family-policy</RepositoryUrl>
+    <RepositoryType>git</RepositoryType>
+    <PackageLicenseExpression>MIT</PackageLicenseExpression>
+    <Deterministic>true</Deterministic>
+    <ContinuousIntegrationBuild Condition="'$(CI)' == 'true'">true</ContinuousIntegrationBuild>
+  </PropertyGroup>
+</Project>

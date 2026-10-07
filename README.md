@@ -1,5 +1,8 @@
 # Family Policy for Jellyfin
 
+[![Build and verify](https://github.com/AnthemFlynn/jellyfin-family-policy/actions/workflows/build.yml/badge.svg?branch=family-policy)](https://github.com/AnthemFlynn/jellyfin-family-policy/actions/workflows/build.yml)
+[![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
+
 **Give children room to explore within boundaries you choose.**
 
 Family Policy adds administrator-managed content rules, individual exceptions,

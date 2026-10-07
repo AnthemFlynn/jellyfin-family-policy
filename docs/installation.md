@@ -16,7 +16,7 @@ supported-version and real-client checks in docs/testing.md pass for your setup.
 5. Use HTTPS outside loopback. Trusted-network HTTP requires explicit
    FAMILY_POLICY_ALLOW_HTTP=true; traffic must stay on a restricted management path.
 6. Supervise the guard independently with automatic restart. A rootless pinned
-   Dockerfile is provided; container execution itself has not been verified locally.
+   Dockerfile is provided; container build/runtime is covered by CI; local target deployment remains unverified.
 7. Select a non-administrator account, choose the PG preset and timezone, then
    configure exceptions. Search titles and save parent-confirmed labels as needed.
 8. Preview decisions, apply, and test allowed/blocked native playback as the child.
