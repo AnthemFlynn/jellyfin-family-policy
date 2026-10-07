@@ -111,7 +111,7 @@
     el('fpMedia').addEventListener('change', showLabels);
     el('fpLabels').addEventListener('click', async () => {
         try {
-            const split = id => el(id).value.split(',').map(s => s.trim()).filter(Boolean);
+            const split = id => { const values = el(id).value.split(',').map(s => s.trim()).filter(Boolean); return values.length ? values : null; };
             const id = el('fpMedia').value; if (!id) throw new Error();
             await call('Labels/' + id, 'PUT', { ExpectedRevision: revision, Labels: { Categories: split('fpCategory'), Subjects: split('fpSubject'), Franchises: split('fpFranchise') } });
             const state = await call('State'); revision = state.Revision; labels = state.Labels || {}; note('Parent-confirmed labels saved. Draft rules preserved.');
